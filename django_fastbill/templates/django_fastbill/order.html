@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+    {% if can_checkout %}
+        {% if iframe %}
+
+        {% else %}
+            <form method="post" action="{{ checkout_url }}">
+                <input type="hidden" name="email" value="{{ user_mail }}">
+                <input type="hidden" name="customer_ext_uid" value="{{ customer_ext_uid }}">
+                <input type="hidden" name="subscription_ext_uid" value="{{ subscription_ext_uid }}">
+                <button type="submit">{% trans "Order now!" %}</button>
+            </form>
+        {% endif %}
+    {% else %}
+       {{ checkout_error }}
+    {% endif %}
+
+{% endblock %}
