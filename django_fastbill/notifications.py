@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def notification_view(request):
     # authorize using basic authentication
+    logger.info("Fastbill notification received")
     if 'HTTP_AUTHORIZATION' in request.META:
         auth = request.META['HTTP_AUTHORIZATION'].split()
         if len(auth) == 2:
@@ -50,7 +51,7 @@ def notification_view(request):
                                 event_type=data["type"],
                                 raw_data=data
                             )
-                        if "subscription" in data["type"]:
+                        elif "subscription" in data["type"]:
                             subscription_signal.send(
                                 sender=__name__,
                                 customer=get_customer_by_id(data["customer"]["customer_id"]),
@@ -58,17 +59,27 @@ def notification_view(request):
                                 event_type=data["type"],
                                 raw_data=data
                             )
-                        if "customer" in data["type"]:
+                        elif "customer" in data["type"]:
+                            customer = get_customer_by_id(data["customer"]["customer_id"])
+
+                            # delete the customer if we have a delete signal
+                            if customer is not None and "delete" in data["type"]:
+                                customer.delete()
+                                customer = None
+
                             customer_signal.send(
                                 sender=__name__,
-                                customer=None if "delete" in data["type"] else get_customer_by_id(data["customer"]
-                                ["customer_id"]),
+                                customer=customer,
                                 event_type=data["type"],
                                 raw_data=data
                             )
+
                     else:
                         logging.warning("Unrecognized notification received: %s" % data["type"])
+                        return HttpResponse(status=401)
 
+                    logger.info("Fastbill Notification processed")
                     return HttpResponse("ok")
 
+    logger.info("Could not process Fastbill Notifcation. Unknown Error.")
     return HttpResponse(status=401)
