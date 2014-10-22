@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 import logging
 from django.utils.translation import ugettext_lazy as _
 from . import helper
+from django.utils.functional import cached_property
+
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +60,10 @@ class Article(FastBillBase):
     currency_code = models.CharField(max_length=3)
     subscription_duration = models.CharField(max_length=50)
 
+    @cached_property
+    def subscriptions(self):
+        return Subscription.objects.filter(article_number=self.article_number)
+
     def __unicode__(self):
         return u"Article, Number: %s Title %s" % (self.article_number, self.title)
 
@@ -86,6 +92,14 @@ class Customer(FastBillBase):
 
         super(Customer, self).save(*args, **kwargs)
 
+    @cached_property
+    def subscriptions(self):
+        return Subscription.objects.filter(customer_id=self.customer_id)
+
+    @cached_property
+    def invoices(self):
+        return Invoice.objects.filter(customer_id=self.customer_id)
+
     def __unicode__(self):
         return u"Customer, ID: %s User: %s" % (self.customer_id, self.user)
 
@@ -111,8 +125,11 @@ class Subscription(FastBillBase):
 
     #fastbill_customer = models.ForeignKey(Customer, null=True, related_name="subscriptions")
     #fastbill_article = models.ForeignKey(Article, null=True, related_name="subscriptions")
+    @cached_property
+    def invoices(self):
+        return Invoice.objects.filter(subscription_id=self.subscription_id)
 
-    @property
+    @cached_property
     def customer(self):
         """
         """
@@ -121,7 +138,7 @@ class Subscription(FastBillBase):
         except Customer.DoesNotExist:
             return helper.get_customer_by_id(customer_id=self.customer_id)
 
-    @property
+    @cached_property
     def article(self):
         """
         """
@@ -189,7 +206,7 @@ class Invoice(FastBillBase):
             return _("credit card")
         return _("other")
 
-    @property
+    @cached_property
     def customer(self):
         """
 
@@ -200,7 +217,7 @@ class Invoice(FastBillBase):
         except Customer.DoesNotExist:
             return helper.get_customer_by_id(self.customer_id)
 
-    @property
+    @cached_property
     def subscription(self):
         """
 
