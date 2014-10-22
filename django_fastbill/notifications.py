@@ -64,8 +64,9 @@ def notification_view(request):
 
                             # delete the customer if we have a delete signal
                             if customer is not None and "delete" in data["type"]:
-                                customer.delete()
-                                customer = None
+                                customer.deleted = True
+                                customer.save()
+                                #customer = None
 
                             customer_signal.send(
                                 sender=__name__,

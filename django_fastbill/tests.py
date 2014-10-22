@@ -16,10 +16,6 @@ class FastbillTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(username="foo", pk=1)
-        print "@" * 40
-        for user in User.objects.all():
-            print user.pk
-        print "@" * 40
 
 
 class UpdateOrCreateTestCase(FastbillTestCase):
@@ -249,9 +245,9 @@ class UpdateOrCreateTestCase(FastbillTestCase):
         self.assertEqual(sub.customer_id, 692738)
         self.assertEqual(sub.quantity, 1)
 
-        customer = Customer.objects.get(customer_id=692738)
+        customer = sub.customer
 
-        self.assertEqual(sub.fastbill_customer, customer)
+        self.assertEqual(customer.customer_id, 692738)
 
     @patch("fastbill.FastbillWrapper._request")
     def test_invoice(self, mocked_call):
@@ -602,6 +598,7 @@ class NotificationTestCase(FastbillTestCase):
         customer = Customer.objects.get(customer_id=customer_deleted["customer"]["customer_id"])
         self.assertEqual(customer.customer_id, int(customer_deleted["customer"]["customer_id"]))
         self.assertEqual(customer.dashboard_url, customer_deleted["customer"]["dashboard_url"])
+        self.assertEqual(customer.deleted, True)
         self.assertEqual(response.status_code, 200)
 
     @patch("fastbill.FastbillWrapper._request")
@@ -1021,7 +1018,7 @@ class NotificationTestCase(FastbillTestCase):
         api_call.side_effect = [
             customer_call,
             subscription_call,
-            article_call,
+            #article_call,
             invoice_call
         ]
 
@@ -1116,7 +1113,7 @@ class NotificationTestCase(FastbillTestCase):
         api_call.side_effect = [
             customer_call,
             subscription_call,
-            article_call,
+            #article_call,
             invoice_call
         ]
 
@@ -1209,7 +1206,7 @@ class NotificationTestCase(FastbillTestCase):
         api_call.side_effect = [
             customer_call,
             subscription_call,
-            article_call,
+            #article_call,
             invoice_call
         ]
 
@@ -1302,7 +1299,7 @@ class NotificationTestCase(FastbillTestCase):
         api_call.side_effect = [
             customer_call,
             subscription_call,
-            article_call,
+            #article_call,
             invoice_call
         ]
 

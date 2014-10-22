@@ -1,3 +1,9 @@
 include *.txt
 include README.md
 recursive-include django_fastbill/templates *
+recursive-include django_fastbill/management *
+recursive-include django_fastbill/south_migrations *.py
+recursive_include django_fastbill/migrations *.py
+
+recursive-exclude django_fastbill/management *.pyc
+recursive-exclude django_fastbill/management *.pyo

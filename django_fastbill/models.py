@@ -3,6 +3,7 @@ from .managers import FastBillApiManager
 from django.contrib.auth.models import User
 import logging
 from django.utils.translation import ugettext_lazy as _
+from . import helper
 
 logger = logging.getLogger(__name__)
 
@@ -19,18 +20,6 @@ class FastBillBase(models.Model):
     class Meta:
         abstract = True
 
-    def get_customer(self, api_update_relations, customer_id):
-        """
-        """
-        from .helper import get_customer_by_id
-        if api_update_relations:
-            return get_customer_by_id(customer_id)
-        else:
-            try:
-                return Customer.objects.get(customer_id=customer_id)
-            except Customer.DoesNotExist:
-                return get_customer_by_id(customer_id)
-
     def get_user(self, customer_ext_uid):
         """
         """
@@ -44,31 +33,6 @@ class FastBillBase(models.Model):
                 logger.warning("User with pk %s does not exist. Customer object without relation created" %
                                customer_ext_uid)
                 return None
-
-    def get_subscription(self, api_update_relations, subscription_id):
-        """
-        """
-        from .helper import get_subscription_by_id
-        if api_update_relations:
-            return get_subscription_by_id(subscription_id)
-        else:
-            try:
-                return Subscription.objects.get(subscription_id=subscription_id)
-            except Subscription.DoesNotExist:
-                return get_subscription_by_id(subscription_id)
-
-    def get_article(self, api_update_relations, article_number):
-        """
-        """
-        from .helper import get_article_by_number
-        if api_update_relations:
-            return get_article_by_number(article_number)
-        else:
-            try:
-                return Article.objects.get(article_number=article_number)
-            except Article.DoesNotExist:
-                return get_article_by_number(article_number)
-
 
 class Article(FastBillBase):
     """
@@ -112,6 +76,8 @@ class Customer(FastBillBase):
 
     user = models.OneToOneField(User, null=True, related_name="fastbill_customer")
 
+    deleted = models.BooleanField(default=False)
+
     def save(self, *args, **kwargs):
         """
         """
@@ -143,35 +109,31 @@ class Subscription(FastBillBase):
     customer_id = models.IntegerField()
     quantity = models.IntegerField()
 
-    fastbill_customer = models.ForeignKey(Customer, null=True, related_name="subscriptions")
-    fastbill_article = models.ForeignKey(Article, null=True, related_name="subscriptions")
+    #fastbill_customer = models.ForeignKey(Customer, null=True, related_name="subscriptions")
+    #fastbill_article = models.ForeignKey(Article, null=True, related_name="subscriptions")
 
     @property
     def customer(self):
         """
         """
-        return self.fastbill_customer
+        try:
+            return Customer.objects.get(customer_id=self.customer_id)
+        except Customer.DoesNotExist:
+            return helper.get_customer_by_id(customer_id=self.customer_id)
 
     @property
     def article(self):
         """
         """
-        return self.fastbill_article
+        try:
+            return Article.objects.get(article_number=self.article_number)
+        except Article.DoesNotExist:
+            return helper.get_article_by_number(self.article_number)
 
-    def save(self, api_update_relations=False, *args,  **kwargs):
+    def save(self, *args,  **kwargs):
         """
         """
         super(Subscription, self).save(*args, **kwargs)
-
-        old_cust, old_article = self.fastbill_customer, self.fastbill_article
-        if self.fastbill_customer is None or api_update_relations:
-            self.fastbill_customer = self.get_customer(api_update_relations, self.customer_id)
-        if self.fastbill_article is None or api_update_relations:
-            self.fastbill_article = self.get_article(api_update_relations, self.article_number)
-
-        if old_cust != self.fastbill_customer or old_article != self.fastbill_article:
-            # resave if something changed
-            super(Subscription, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return "Subscription, ID: %s customer %s" % (self.subscription_id, self.customer)
@@ -209,8 +171,8 @@ class Invoice(FastBillBase):
     vat_total = models.FloatField()
     template_id = models.IntegerField()
 
-    fastbill_customer = models.ForeignKey(Customer, null=True, related_name="invoices")
-    fastbill_subscription = models.ForeignKey(Subscription, null=True, related_name="invoices")
+    #fastbill_customer = models.ForeignKey(Customer, null=True, related_name="invoices")
+    #fastbill_subscription = models.ForeignKey(Subscription, null=True, related_name="invoices")
 
     def get_payment_type(self):
         if self.payment_type == "1":
@@ -233,7 +195,10 @@ class Invoice(FastBillBase):
 
         :return:
         """
-        return self.fastbill_customer
+        try:
+            return Customer.objects.get(customer_id=self.customer_id)
+        except Customer.DoesNotExist:
+            return helper.get_customer_by_id(self.customer_id)
 
     @property
     def subscription(self):
@@ -241,9 +206,12 @@ class Invoice(FastBillBase):
 
         :return:
         """
-        return self.fastbill_subscription
+        try:
+            return Subscription.objects.get(subscription_id=self.subscription_id)
+        except Subscription.DoesNotExist:
+            return helper.get_subscription_by_id(self.subscription_id)
 
-    def save(self, api_update_relations=False, *args, **kwargs):
+    def save(self, *args, **kwargs):
         """
 
         :param api_update_relations:
@@ -252,18 +220,6 @@ class Invoice(FastBillBase):
         :return:
         """
         super(Invoice, self).save(*args, **kwargs)
-
-        old_cust, old_sub = self.fastbill_customer, self.fastbill_subscription
-
-        if self.fastbill_customer is None or api_update_relations:
-            self.fastbill_customer = self.get_customer(api_update_relations, self.customer_id)
-
-        if self.fastbill_subscription is None or api_update_relations:
-            self.fastbill_subscription = self.get_subscription(api_update_relations, self.subscription_id)
-
-        if old_cust != self.fastbill_customer or old_sub != self.fastbill_subscription:
-            # resave if something changed
-            super(Invoice, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return u"Invoice, ID:%s Number: %s" % (self.invoice_id, self.invoice_number)

@@ -10,7 +10,7 @@ except IOError:
 
 setup(
     name='django-fastbill',
-    version="0.1.7",
+    version="0.2",
     description='A thin python wrapper for the fastbill API',
     long_description=long_description,
     author='Jannis Gebauer',

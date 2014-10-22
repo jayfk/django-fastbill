@@ -9,7 +9,7 @@ class Command(BaseCommand):
             action='store_true',
             dest='update-articles',
             default=False,
-            help='Delete poll instead of closing it'),
+            help='Fetches all Articles'),
         )
 
     def handle(self, *args, **options):
