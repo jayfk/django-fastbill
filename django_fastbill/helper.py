@@ -5,6 +5,27 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
+def get_change_billing_url(customer):
+    return "https://automatic.fastbill.com/accountdata/%s/%s" % (settings.FASTBILL_HASH, customer.customer_id)
+
+
+def get_new_plan_url(customer, article):
+    return "https://automatic.fastbill.com/checkout/0/%s/%s/%s" % (
+        settings.FASTBILL_HASH, customer.customer_id, article.article_number)
+
+
+def get_change_plan_url(subscription, article):
+    return "https://automatic.fastbill.com/change/%s/%s/%s" % (
+        settings.FASTBILL_HASH, subscription.subscription_id, article.article_number
+    )
+
+
+def get_cancel_url(subscription):
+    return "https://automatic.fastbill.com/cancel/%s/%s/" % (
+        settings.FASTBILL_HASH, subscription.subscription_id
+    )
+
+
 def get_connection():
     """
 
@@ -30,7 +51,7 @@ def get_customer_by_id(customer_id):
                                                                                                  customer.customer_id))
             return None
         return customer
-    except (IndexError, ValueError, ConvertError) as e:
+    except (IndexError, ValueError, ConvertError, TypeError) as e:
         logger.warning("Could not fetch customer with customer_id %s, error: %s" % (customer_id, e))
     return None
 
@@ -52,7 +73,7 @@ def get_subscription_by_id(subscription_id):
                                                                                                  sub.subscription_id))
             return None
         return sub
-    except (IndexError, ValueError, ConvertError) as e:
+    except (IndexError, ValueError, ConvertError, TypeError) as e:
         logger.warning("Could not fetch subscription with subscription_id %s, error: %s" % (subscription_id, e))
     return None
 
@@ -74,7 +95,7 @@ def get_invoice_by_id(invoice_id):
                                                                                                  invoice.invoice_id))
             return None
         return invoice
-    except (IndexError, ValueError, ConvertError) as e:
+    except (IndexError, ValueError, ConvertError, TypeError) as e:
         logger.warning("Could not fetch subscription with subscription_id %s, error: %s" % (invoice_id, e))
     return None
 
@@ -96,7 +117,7 @@ def get_article_by_number(article_number):
                                                                                                  article.article_number))
             return None
         return article
-    except (IndexError, ValueError, ConvertError) as e:
+    except (IndexError, ValueError, ConvertError, TypeError) as e:
         logger.warning("Could not fetch article with article_number %s, error: %s" % (article_number, e))
     return None
 
