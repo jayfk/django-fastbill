@@ -5,7 +5,7 @@ import logging
 from django.utils.translation import ugettext_lazy as _
 from . import helper
 from django.utils.functional import cached_property
-
+from fastbill import FastbillError
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +155,29 @@ class Subscription(FastBillBase):
     def __unicode__(self):
         return "Subscription, ID: %s customer %s" % (self.subscription_id, self.customer)
 
+    def cancel(self):
+        try:
+            response = helper.get_connection().subscription_cancel(data={"SUBSCRIPTION_ID": self.subscription_id})
+            if response.get("STATUS", False) == "success":
+                return True
+            else:
+                logger.warning("Subscription could not be canceled, response: %s" % response)
+                return False
+        except FastbillError as e:
+            logger.error("FastbillError during Subscription cancel:" % e.message, exc_info=True)
+            return False
+
+    def reactivate(self):
+        try:
+            response = helper.get_connection().subscription_reactivate(data={"SUBSCRIPTION_ID": self.subscription_id})
+            if response.get("STATUS", False) == "success":
+                return True
+            else:
+                logger.warning("Subscription could not be canceled, response: %s" % response)
+                return False
+        except FastbillError as e:
+            logger.error("FastbillError during Subscription cancel:" % e.message, exc_info=True)
+            return False
 
 class Invoice(FastBillBase):
     """

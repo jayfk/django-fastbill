@@ -1311,3 +1311,63 @@ class NotificationTestCase(FastbillTestCase):
         Subscription.objects.get(subscription_id=payment_refunded["subscription"]["subscription_id"])
         Invoice.objects.get(invoice_id=payment_refunded["payment"]["invoice_id"])
 
+
+class SubscriptionTestCase(FastbillTestCase):
+
+    @patch("fastbill.FastbillWrapper._request")
+    def test_cancel(self, mocked_call):
+        sub_call = {u'SUBSCRIPTIONS': [{u'STATUS': u'active', u'X_ATTRIBUTES': u'', u'INVOICE_TITLE': u'',
+                                        u'HASH': u'0d124afc9c8758be0076bd5921c77346',
+                                        u'CANCELLATION_DATE': u'0000-00-00 00:00:00',
+                                        u'EXPIRATION_DATE': u'2014-08-21 12:20:22',
+                                        u'LAST_EVENT': u'2014-07-21 12:20:22',
+                                        u'START': u'2014-07-21 12:20:22', u'SUBSCRIPTION_EXT_UID': u'1',
+                                        u'NEXT_EVENT': u'2014-08-21 12:20:22', u'ARTICLE_NUMBER': u'1',
+                                        u'SUBSCRIPTION_ID': 312392, u'CUSTOMER_ID': 692708, u'ADDONS': [],
+                                        u'QUANTITY': u'1'}]}
+
+        cancel_response = {u'STATUS': u'success', u'CANCELLATION_DATE': u'2014-11-05 12:00:15'}
+        cancel_response2 = {u'STATUS': u'error', u'CANCELLATION_DATE': u'2014-11-05 12:00:15'}
+
+        mocked_call.side_effect = [
+            sub_call,
+            cancel_response,
+            cancel_response2
+        ]
+
+        from .helper import get_subscription_by_id
+        sub = get_subscription_by_id(312392)
+
+        self.assertEqual(sub.subscription_id, 312392)
+        self.assertEqual(sub.cancel(), True)
+        self.assertEqual(sub.cancel(), False)
+
+    @patch("fastbill.FastbillWrapper._request")
+    def test_reactivate(self, mocked_call):
+
+
+        sub_call = {u'SUBSCRIPTIONS': [{u'STATUS': u'active', u'X_ATTRIBUTES': u'', u'INVOICE_TITLE': u'',
+                                        u'HASH': u'0d124afc9c8758be0076bd5921c77346',
+                                        u'CANCELLATION_DATE': u'0000-00-00 00:00:00',
+                                        u'EXPIRATION_DATE': u'2014-08-21 12:20:22',
+                                        u'LAST_EVENT': u'2014-07-21 12:20:22',
+                                        u'START': u'2014-07-21 12:20:22', u'SUBSCRIPTION_EXT_UID': u'1',
+                                        u'NEXT_EVENT': u'2014-08-21 12:20:22', u'ARTICLE_NUMBER': u'1',
+                                        u'SUBSCRIPTION_ID': 312392, u'CUSTOMER_ID': 692708, u'ADDONS': [],
+                                        u'QUANTITY': u'1'}]}
+
+        reactivate_response = {u'STATUS': u'success'}
+        reactivate_response2 = {u'STATUS': u'error'}
+
+        mocked_call.side_effect = [
+            sub_call,
+            reactivate_response,
+            reactivate_response2
+        ]
+
+        from .helper import get_subscription_by_id
+        sub = get_subscription_by_id(312392)
+
+        self.assertEqual(sub.subscription_id, 312392)
+        self.assertEqual(sub.reactivate(), True)
+        self.assertEqual(sub.reactivate(), False)
