@@ -8,28 +8,14 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting field 'Invoice.invoice_ttitle'
-        db.delete_column(u'django_fastbill_invoice', 'invoice_ttitle')
 
-        # Adding field 'Invoice.invoice_title'
-        db.add_column(u'django_fastbill_invoice', 'invoice_title',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=300),
-                      keep_default=False)
-
+        # Changing field 'Invoice.affiliate'
+        db.alter_column(u'django_fastbill_invoice', 'affiliate', self.gf('django.db.models.fields.CharField')(max_length=10, null=True))
 
     def backwards(self, orm):
 
-        # User chose to not deal with backwards NULL issues for 'Invoice.invoice_ttitle'
-        raise RuntimeError("Cannot reverse this migration. 'Invoice.invoice_ttitle' and its values cannot be restored.")
-        
-        # The following code is provided here to aid in writing a correct migration        # Adding field 'Invoice.invoice_ttitle'
-        db.add_column(u'django_fastbill_invoice', 'invoice_ttitle',
-                      self.gf('django.db.models.fields.CharField')(max_length=300),
-                      keep_default=False)
-
-        # Deleting field 'Invoice.invoice_title'
-        db.delete_column(u'django_fastbill_invoice', 'invoice_title')
-
+        # Changing field 'Invoice.affiliate'
+        db.alter_column(u'django_fastbill_invoice', 'affiliate', self.gf('django.db.models.fields.CharField')(default='', max_length=10))
 
     models = {
         u'auth.group': {
@@ -48,7 +34,7 @@ class Migration(SchemaMigration):
         u'auth.user': {
             'Meta': {'object_name': 'User'},
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
+            'email': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '255'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Group']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -59,7 +45,7 @@ class Migration(SchemaMigration):
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Permission']"}),
-            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
+            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})
         },
         u'contenttypes.contenttype': {
             'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
@@ -101,11 +87,12 @@ class Migration(SchemaMigration):
             'customer_id': ('django.db.models.fields.IntegerField', [], {'primary_key': 'True'}),
             'customer_number': ('django.db.models.fields.IntegerField', [], {}),
             'dashboard_url': ('django.db.models.fields.URLField', [], {'max_length': '500'}),
+            'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'fastbill_customer'", 'unique': 'True', 'null': 'True', 'to': u"orm['auth.User']"})
         },
         u'django_fastbill.invoice': {
             'Meta': {'object_name': 'Invoice'},
-            'affiliate': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
+            'affiliate': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True'}),
             'cash_discount_days': ('django.db.models.fields.IntegerField', [], {}),
             'cash_discount_percent': ('django.db.models.fields.FloatField', [], {}),
             'changed_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
@@ -118,8 +105,6 @@ class Migration(SchemaMigration):
             'delivery_date': ('django.db.models.fields.CharField', [], {'max_length': '300'}),
             'document_url': ('django.db.models.fields.URLField', [], {'max_length': '500'}),
             'due_date': ('django.db.models.fields.DateTimeField', [], {}),
-            'fastbill_customer': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'invoices'", 'null': 'True', 'to': u"orm['django_fastbill.Customer']"}),
-            'fastbill_subscription': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'invoices'", 'null': 'True', 'to': u"orm['django_fastbill.Subscription']"}),
             'introtext': ('django.db.models.fields.TextField', [], {}),
             'invoice_date': ('django.db.models.fields.DateTimeField', [], {}),
             'invoice_id': ('django.db.models.fields.IntegerField', [], {'primary_key': 'True'}),
@@ -145,8 +130,6 @@ class Migration(SchemaMigration):
             'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'customer_id': ('django.db.models.fields.IntegerField', [], {}),
             'expiration_date': ('django.db.models.fields.DateTimeField', [], {}),
-            'fastbill_article': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'subscriptions'", 'null': 'True', 'to': u"orm['django_fastbill.Article']"}),
-            'fastbill_customer': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'subscriptions'", 'null': 'True', 'to': u"orm['django_fastbill.Customer']"}),
             'invoice_title': ('django.db.models.fields.CharField', [], {'max_length': '300'}),
             'last_event': ('django.db.models.fields.DateTimeField', [], {}),
             'next_event': ('django.db.models.fields.DateTimeField', [], {}),
