@@ -10,14 +10,14 @@ except IOError:
 
 setup(
     name='django-fastbill',
-    version="0.2",
-    description='A thin python wrapper for the fastbill API',
+    version="0.2.7",
+    description='A reusable django app for fastbill integration',
     long_description=long_description,
     author='Jannis Gebauer',
     author_email='ja.geb@pricemesh.io',
     url='http://github.com/jayfk/django-fastbill',
     license='MIT License',
-    packages=['django_fastbill', "django_fastbill.management.commands",],
+    packages=['django_fastbill', "django_fastbill.management.commands", "django_fastbill.migrations"],
     install_requires=[
         'requests', 'fastbill'
     ],
