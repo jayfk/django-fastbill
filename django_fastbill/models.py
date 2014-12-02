@@ -184,7 +184,7 @@ class Invoice(FastBillBase):
 
     """
     cash_discount_percent = models.FloatField()
-    affiliate = models.CharField(max_length=10)
+    affiliate = models.CharField(max_length=10, null=True)
     payment_type = models.CharField(max_length=2)
     introtext = models.TextField()
     due_date = models.DateTimeField()
