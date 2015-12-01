@@ -1,1 +1,1 @@
-fastbill==0.4.3
+fastbill==1.2
