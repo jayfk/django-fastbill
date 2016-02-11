@@ -17,7 +17,7 @@ setup(
     author_email='ja.geb@pricemesh.io',
     url='http://github.com/jayfk/django-fastbill',
     license='MIT License',
-    packages=['django_fastbill', "django_fastbill.management.commands", "django_fastbill.migrations"],
+    packages=['django_fastbill', "django_fastbill.management.commands"],
     install_requires=[
         'requests', 'fastbill'
     ],
