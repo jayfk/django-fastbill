@@ -16,7 +16,7 @@ def get_new_plan_url(customer, article):
 
 def get_change_plan_url(subscription, article):
     return "https://automatic.fastbill.com/change/%s/%s/%s" % (
-        settings.FASTBILL_HASH, subscription.subscription_id, article.article_number
+        settings.FASTBILL_HASH, subscription.hash, article.article_number
     )
 
 
@@ -131,4 +131,3 @@ def get_articles():
             created, article = Article.objects.update_or_create(api_item)
         except ConvertError, e:
             logger.warning("Could not fetch article: %s" % e)
-

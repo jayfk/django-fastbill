@@ -112,6 +112,7 @@ class Subscription(FastBillBase):
 
     x_attributes = models.TextField()
     invoice_title = models.CharField(max_length=300)
+    hash = models.CharField(max_length=64, null=True)
     cancellation_date = models.DateTimeField(null=True)
     expiration_date = models.DateTimeField()
     last_event = models.DateTimeField()
