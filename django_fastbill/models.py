@@ -76,7 +76,7 @@ class Customer(FastBillBase):
     customer_number = models.IntegerField()
     customer_ext_uid = models.IntegerField(null=True)
     customer_id = models.IntegerField(primary_key=True)
-
+    hash = models.CharField(max_length=64, null=True)
     dashboard_url = models.URLField(max_length=500)
     changedata_url = models.URLField(max_length=500)
 
