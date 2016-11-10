@@ -11,7 +11,7 @@ def get_change_billing_url(customer):
 
 def get_new_plan_url(customer, article):
     return "https://automatic.fastbill.com/checkout/0/%s/%s/%s" % (
-        settings.FASTBILL_HASH, customer.customer_id, article.article_number)
+        settings.FASTBILL_HASH, customer.hash, article.article_number)
 
 
 def get_change_plan_url(subscription, article):
